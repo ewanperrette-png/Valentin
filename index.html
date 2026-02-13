@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Message secret ❤️</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    overflow:hidden;
+    font-family:Arial;
+    background:linear-gradient(135deg,#ff9aa2,#ff4d6d,#ff1e56);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+/* carte */
+.card{
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(8px);
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+    z-index:10;
+}
+
+/* phrase */
+#hint{
+    font-size:26px;
+    margin-bottom:15px;
+}
+
+/* pendu */
+.slot{
+    display:inline-block;
+    width:60px;
+    border-bottom:4px solid white;
+    margin:10px;
+    font-size:40px;
+    height:45px;
+}
+
+/* coeurs */
+.heart{
+    position:absolute;
+    font-size:48px;
+    cursor:pointer;
+    z-index:20;
+}
+
+/* lettres */
+.letter{
+    position:absolute;
+    font-size:55px;
+    font-weight:bold;
+    cursor:grab;
+    user-select:none;
+    z-index:30;
+}
+
+/* ===== ballons en forme de cœur ===== */
+.balloon{
+    position:absolute;
+    bottom:-120px;
+    cursor:pointer;
+    z-index:50;
+    transition:0.2s;
+    font-size:50px;
+}
+
+.balloon::before{
+    content:"❤️";
+}
+
+.balloon::after{
+    content:"";
+    position:absolute;
+    width:2px;
+    height:60px;
+    background:#fff;
+    left:50%;
+    transform:translateX(-50%);
+    top:50px;
+}
+
+@keyframes float{
+    from{transform:translateY(0);}
+    to{transform:translateY(-120vh);}
+}
+
+/* explosion */
+.explode{
+    position:absolute;
+    font-size:45px;
+    z-index:60;
+    animation:boom 0.5s forwards;
+}
+@keyframes boom{
+    from{transform:scale(1);}
+    to{transform:scale(2);opacity:0;}
+}
+
+/* clé draggable */
+.key{
+    position:absolute;
+    font-size:60px;
+    cursor:grab;
+    z-index:60;
+    user-select:none;
+}
+
+.key:active{
+    cursor:grabbing;
+}
+
+/* Animation de chute de la clé */
+.key-falling{
+    position:absolute;
+    font-size:60px;
+    top:-100px;
+    left:50%;
+    transform:translateX(-50%);
+    animation:drop 2.5s forwards;
+    z-index:60;
+}
+
+@keyframes drop{
+    to{top:85vh;}
+}
+
+/* Bouton skip en bas à droite */
+#skipBtn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:rgba(255,255,255,0.3);
+    color:white;
+    border:2px solid white;
+    padding:10px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    z-index:100;
+    transition:0.3s;
+}
+
+#skipBtn:hover{
+    background:rgba(255,255,255,0.5);
+    transform:scale(1.05);
+}
+
+/* Animations de transition */
+.fade-in{
+    animation:fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:scale(0.8);}
+    to{opacity:1; transform:scale(1);}
+}
+
+.fade-out{
+    animation:fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeOut{
+    from{opacity:1; transform:scale(1);}
+    to{opacity:0; transform:scale(0.8);}
+}
+
+/* Cœurs qui tombent en arrière-plan */
+.falling-heart{
+    position:absolute;
+    font-size:30px;
+    animation:fall linear infinite;
+    z-index:5;
+    pointer-events:none;
+}
+
+@keyframes fall{
+    from{top:-50px; opacity:1;}
+    to{top:110vh; opacity:0.3;}
+}
+
+/* Effet sparkle */
+.sparkle{
+    position:absolute;
+    font-size:20px;
+    animation:sparkle 1s ease-out forwards;
+    z-index:70;
+    pointer-events:none;
+}
+
+@keyframes sparkle{
+    0%{transform:scale(0) rotate(0deg); opacity:1;}
+    50%{transform:scale(1.5) rotate(180deg); opacity:1;}
+    100%{transform:scale(0) rotate(360deg); opacity:0;}
+}
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+    .card{
+        padding:20px;
+        max-width:90%;
+    }
+    
+    #hint{
+        font-size:18px !important;
+        margin-bottom:20px !important;
+    }
+    
+    .slot{
+        width:45px;
+        height:40px;
+        font-size:32px;
+        margin:5px;
+    }
+    
+    .letter{
+        font-size:45px;
+        touch-action:none;
+    }
+    
+    .heart{
+        font-size:40px;
+        touch-action:manipulation;
+    }
+    
+    .balloon{
+        font-size:40px;
+        touch-action:manipulation;
+    }
+    
+    .key{
+        font-size:50px;
+        touch-action:none;
+    }
+    
+    .key-falling{
+        font-size:50px;
+    }
+    
+    #lockZone{
+        font-size:60px !important;
+    }
+    
+    #result{
+        font-size:24px !important;
+    }
+    
+    #binaryCode{
+        font-size:8px;
+        margin:20px 10px !important;
+        word-break:break-all;
+    }
+    
+    /* Animations identiques sur mobile */
+    .falling-heart{
+        font-size:25px;
+    }
+    
+    .sparkle{
+        font-size:18px;
+    }
+    
+    .explode{
+        font-size:40px;
+    }
+    
+    /* Bouton skip plus accessible sur mobile */
+    #skipBtn{
+        bottom:15px;
+        right:15px;
+        padding:8px 15px;
+        font-size:13px;
+        touch-action:manipulation;
+    }
+}
+
+/* Empêcher le zoom sur double-tap (iOS) */
+button, .letter, .key, .heart, .balloon{
+    touch-action:manipulation;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div id="hint" style="margin-bottom:40px;display:none;">Clique sur les cœurs puis glisse les lettres pour former le prénom de ton amoureux</div>
+
+<div id="slots" style="display:none;"></div>
+
+<div id="binaryCode" style="font-family:monospace;margin:40px 20px 20px 20px;position:relative;">
+01010110 01100101 01110101 01111000 00100000 01110100 01110101 00100000 01100010 01101001 01100101 01101110 00100000 11101010 01110100 01110010 01100101 00100000 01101101 01100001 00100000 01010110 01100001 01101100 01100101 01101110 01110100 01101001 01101110 01100101 00111111
+<div id="lockZone" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:70px;cursor:default;">🔒</div>
+</div>
+
+<button id="startBtn" onclick="startGame()">Decoder 🔓</button>
+
+<h2 id="result"></h2>
+
+</div>
+
+<button id="skipBtn" onclick="skipToNext()" style="display:none">Passer l'énigme ⏭️</button>
+
+<!-- Musique romantique -->
+<audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_4a06de6bdb.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+const name="EWAN";
+let balloonsActive = false;
+let balloons = [];
+let currentStep = 0; // 0=pas commencé, 1=pendu, 2=ballons, 3=serrure
+
+/* ===== Cœurs qui tombent en arrière-plan ===== */
+function createFallingHearts(){
+    setInterval(() => {
+        let heart = document.createElement("div");
+        heart.className = "falling-heart";
+        heart.innerHTML = "💗";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.animationDuration = (Math.random() * 3 + 4) + "s";
+        heart.style.animationDelay = Math.random() * 2 + "s";
+        document.body.appendChild(heart);
+        
+        setTimeout(() => heart.remove(), 8000);
+    }, 800);
+}
+
+/* ===== Effet sparkle ===== */
+function createSparkle(x, y){
+    for(let i = 0; i < 8; i++){
+        let sparkle = document.createElement("div");
+        sparkle.className = "sparkle";
+        sparkle.innerHTML = "✨";
+        sparkle.style.left = x + (Math.random() - 0.5) * 100 + "px";
+        sparkle.style.top = y + (Math.random() - 0.5) * 100 + "px";
+        document.body.appendChild(sparkle);
+        
+        setTimeout(() => sparkle.remove(), 1000);
+    }
+}
+
+/* ===== Fonction pour passer l'énigme ===== */
+function skipToNext(){
+    if(currentStep === 1){
+        // Passer le pendu
+        keyDrop();
+    } else if(currentStep === 2){
+        // Passer les ballons - faire apparaître la clé
+        balloons.forEach(b => b.remove());
+        balloons = [];
+        balloonsActive = false;
+        
+        const hint = document.getElementById("hint");
+        hint.innerHTML="Glisse la clé sur la serrure 🔒";
+        
+        // Faire apparaître la clé en bas au centre
+        spawnDraggableKey("50%", "85vh");
+    }
+}
+
+/* ===== Ballons décoratifs dès le début ===== */
+window.onload = () => {
+    spawnDecorativeBalloons();
+};
+
+function spawnDecorativeBalloons(){
+    for(let i=0;i<7;i++){
+        let b=document.createElement("div");
+        b.className="balloon";
+        
+        // Position horizontale aléatoire
+        let leftPos = Math.random()*90 + 5; // entre 5% et 95%
+        b.style.left = leftPos + "vw";
+        
+        // Vitesse aléatoire (entre 10s et 18s)
+        let duration = Math.random()*8 + 10;
+        
+        // Délai de départ aléatoire
+        let delay = Math.random()*5;
+        
+        b.style.animation = `float ${duration}s linear ${delay}s infinite`;
+        
+        document.body.appendChild(b);
+        balloons.push(b);
+    }
+}
+
+/* ===== START ===== */
+function startGame(){
+    document.getElementById("startBtn").remove();
+    
+    // Démarrer la musique (fonctionne sur iOS car déclenché par interaction)
+    const music = document.getElementById("bgMusic");
+    music.volume = 0.3;
+    music.play().catch(err => {
+        // Si la lecture auto échoue (certains navigateurs mobiles), on continue sans musique
+        console.log("Musique non disponible");
+    });
+    
+    // Lancer les cœurs qui tombent
+    createFallingHearts();
+    
+    // Afficher le hint et les slots avec animation
+    const hint = document.getElementById("hint");
+    const slots = document.getElementById("slots");
+    hint.style.display = "block";
+    slots.style.display = "block";
+    hint.classList.add("fade-in");
+    
+    for(let i=0;i<4;i++){
+        let s=document.createElement("span");
+        s.className="slot";
+        slots.appendChild(s);
+    }
+
+    currentStep = 1;
+    document.getElementById("skipBtn").style.display = "block";
+    spawnHearts();
+}
+
+/* ===== ENIGME 1 ===== */
+function spawnHearts(){
+
+    // Créer un tableau avec les lettres et leurs positions correctes
+    let letterData = [
+        {letter: "E", correctIndex: 0},
+        {letter: "W", correctIndex: 1},
+        {letter: "A", correctIndex: 2},
+        {letter: "N", correctIndex: 3}
+    ];
+    
+    // Mélanger aléatoirement l'ordre des lettres
+    for(let i = letterData.length - 1; i > 0; i--){
+        let j = Math.floor(Math.random() * (i + 1));
+        [letterData[i], letterData[j]] = [letterData[j], letterData[i]];
+    }
+    
+    // Positions dans les 4 coins (zones entourées)
+    let positions = [
+        [10, 12],   // Haut gauche
+        [90, 12],   // Haut droite
+        [22, 78],   // Bas gauche
+        [90, 80]    // Bas droite
+    ];
+
+    letterData.forEach((data, i)=>{
+        let h=document.createElement("div");
+        h.className="heart";
+        h.innerHTML="❤️";
+        h.style.left=positions[i][0]+"vw";
+        h.style.top=positions[i][1]+"vh";
+
+        h.onclick=()=>{
+            h.remove();
+            spawnLetter(data.letter, data.correctIndex, positions[i]);
+        };
+
+        document.body.appendChild(h);
+    });
+}
+
+/* drag */
+function spawnLetter(letter, correctIndex, pos){
+    let el=document.createElement("div");
+    el.className="letter";
+    el.innerHTML=letter;
+    el.style.left=pos[0]+"vw";
+    el.style.top=pos[1]+"vh";
+
+    let dragging=false, ox, oy;
+
+    // Support SOURIS
+    el.onmousedown=e=>{
+        dragging=true;
+        ox=e.offsetX; oy=e.offsetY;
+        e.preventDefault();
+    };
+
+    const moveHandler = e=>{
+        if(dragging){
+            el.style.left=(e.clientX-ox)+"px";
+            el.style.top=(e.clientY-oy)+"px";
+        }
+    };
+
+    const upHandler = e=>{
+        if(!dragging) return;
+        dragging=false;
+
+        let placed = false;
+        document.querySelectorAll(".slot").forEach((s, index)=>{
+            let r=s.getBoundingClientRect();
+            if(e.clientX>r.left && e.clientX<r.right &&
+               e.clientY>r.top && e.clientY<r.bottom &&
+               s.innerHTML===""){
+                
+                // Vérifier si c'est la bonne position pour cette lettre
+                if(correctIndex === index){
+                    // Bonne position ! Effet sparkle
+                    createSparkle(e.clientX, e.clientY);
+                    s.innerHTML=letter;
+                    el.remove();
+                    placed = true;
+                    document.removeEventListener("mousemove", moveHandler);
+                    document.removeEventListener("mouseup", upHandler);
+                    document.removeEventListener("touchmove", touchMoveHandler);
+                    document.removeEventListener("touchend", touchEndHandler);
+                    checkWord();
+                } else {
+                    // Mauvaise position ! Tu as perdu
+                    const hint = document.getElementById("hint");
+                    const result = document.getElementById("result");
+                    hint.innerHTML="❌ Mauvaise lettre ! Tu as perdu !";
+                    result.innerHTML="🔄 Rechargement dans 3 secondes...";
+                    result.style.color = "#ff1744";
+                    
+                    setTimeout(()=>{
+                        location.reload();
+                    }, 3000);
+                }
+            }
+        });
+    };
+
+    // Support TACTILE (mobile)
+    el.ontouchstart = e => {
+        dragging = true;
+        const touch = e.touches[0];
+        const rect = el.getBoundingClientRect();
+        ox = touch.clientX - rect.left;
+        oy = touch.clientY - rect.top;
+        e.preventDefault();
+    };
+
+    const touchMoveHandler = e => {
+        if(dragging){
+            const touch = e.touches[0];
+            el.style.left = (touch.clientX - ox) + "px";
+            el.style.top = (touch.clientY - oy) + "px";
+            e.preventDefault();
+        }
+    };
+
+    const touchEndHandler = e => {
+        if(!dragging) return;
+        dragging = false;
+
+        const touch = e.changedTouches[0];
+        let placed = false;
+        
+        document.querySelectorAll(".slot").forEach((s, index) => {
+            let r = s.getBoundingClientRect();
+            if(touch.clientX > r.left && touch.clientX < r.right &&
+               touch.clientY > r.top && touch.clientY < r.bottom &&
+               s.innerHTML === ""){
+                
+                if(correctIndex === index){
+                    createSparkle(touch.clientX, touch.clientY);
+                    s.innerHTML = letter;
+                    el.remove();
+                    placed = true;
+                    document.removeEventListener("mousemove", moveHandler);
+                    document.removeEventListener("mouseup", upHandler);
+                    document.removeEventListener("touchmove", touchMoveHandler);
+                    document.removeEventListener("touchend", touchEndHandler);
+                    checkWord();
+                } else {
+                    const hint = document.getElementById("hint");
+                    const result = document.getElementById("result");
+                    hint.innerHTML = "❌ Mauvaise lettre ! Tu as perdu !";
+                    result.innerHTML = "🔄 Rechargement dans 3 secondes...";
+                    result.style.color = "#ff1744";
+                    
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                }
+            }
+        });
+    };
+
+    document.addEventListener("mousemove", moveHandler);
+    document.addEventListener("mouseup", upHandler);
+    document.addEventListener("touchmove", touchMoveHandler, {passive: false});
+    document.addEventListener("touchend", touchEndHandler);
+
+    document.body.appendChild(el);
+}
+
+function checkWord(){
+    let w="";
+    document.querySelectorAll(".slot").forEach(s=>w+=s.innerHTML);
+    if(w.length===4 && w===name) keyDrop();
+}
+
+/* ===== ENIGME 2 serrure apparaît et clé tombe ===== */
+function keyDrop(){
+
+    const hint = document.getElementById("hint");
+    const slots = document.getElementById("slots");
+    
+    // Faire disparaître les éléments de l'énigme 1 avec animation
+    hint.classList.add("fade-out");
+    slots.classList.add("fade-out");
+    
+    setTimeout(() => {
+        hint.innerHTML="Mince la clé est tombée dans un des ballons, explose-les tous pour la trouver";
+        hint.classList.remove("fade-out");
+        hint.classList.add("fade-in");
+        
+        // Afficher la serrure au centre du code binaire
+        document.getElementById("lockZone").style.display = "block";
+        
+        // Faire tomber la clé
+        let key = document.createElement("div");
+        key.className = "key-falling";
+        key.innerHTML = "🗝️";
+        document.body.appendChild(key);
+
+        setTimeout(() => {
+            key.remove();
+            balloonGame();
+        }, 2500);
+    }, 500);
+}
+
+/* ===== ballons ===== */
+function balloonGame(){
+
+    currentStep = 2;
+    balloonsActive = true;
+    let keyIndex = Math.floor(Math.random()*balloons.length);
+
+    balloons.forEach((b, i) => {
+        b.clicks = 0;
+        
+        b.onclick = () => {
+            if(!balloonsActive) return;
+            
+            b.clicks++;
+
+            if(b.clicks === 1){
+                b.style.transform = "scale(1.3)";
+            }
+            else if(b.clicks === 2){
+
+                let boom = document.createElement("div");
+                boom.className = "explode";
+                boom.innerHTML = "💥";
+                boom.style.left = b.style.left;
+                boom.style.top = "60vh";
+                document.body.appendChild(boom);
+
+                setTimeout(() => boom.remove(), 400);
+
+                if(i === keyIndex){
+                    // Supprimer tous les ballons
+                    balloons.forEach(balloon => balloon.remove());
+                    balloons = [];
+                    balloonsActive = false;
+                    
+                    const hint = document.getElementById("hint");
+                    hint.innerHTML="Glisse la clé sur la serrure 🔒";
+                    
+                    // Faire apparaître la clé en bas au centre (là où elle est tombée)
+                    spawnDraggableKey("50%", "85vh");
+                }
+                else{
+                    b.remove();
+                }
+            }
+        };
+    });
+}
+
+/* ===== Clé draggable ===== */
+function spawnDraggableKey(left, top){
+    let key = document.createElement("div");
+    key.className = "key";
+    key.innerHTML = "🗝️";
+    key.style.left = left;
+    key.style.top = top;
+    
+    let dragging = false, ox, oy;
+
+    // Support SOURIS
+    key.onmousedown = e => {
+        dragging = true;
+        ox = e.offsetX; 
+        oy = e.offsetY;
+        e.preventDefault();
+    };
+
+    const moveHandler = e => {
+        if(dragging){
+            key.style.left = (e.clientX - ox) + "px";
+            key.style.top = (e.clientY - oy) + "px";
+        }
+    };
+
+    const upHandler = e => {
+        if(!dragging) return;
+        dragging = false;
+
+        // Vérifier si la clé est sur la serrure
+        let lockZone = document.getElementById("lockZone");
+        let lockRect = lockZone.getBoundingClientRect();
+        
+        if(e.clientX > lockRect.left && e.clientX < lockRect.right &&
+           e.clientY > lockRect.top && e.clientY < lockRect.bottom){
+            // Clé déposée sur la serrure ! Effet sparkle
+            createSparkle(e.clientX, e.clientY);
+            key.remove();
+            document.removeEventListener("mousemove", moveHandler);
+            document.removeEventListener("mouseup", upHandler);
+            document.removeEventListener("touchmove", touchMoveHandler);
+            document.removeEventListener("touchend", touchEndHandler);
+            unlockFinal();
+        }
+    };
+
+    // Support TACTILE (mobile)
+    key.ontouchstart = e => {
+        dragging = true;
+        const touch = e.touches[0];
+        const rect = key.getBoundingClientRect();
+        ox = touch.clientX - rect.left;
+        oy = touch.clientY - rect.top;
+        e.preventDefault();
+    };
+
+    const touchMoveHandler = e => {
+        if(dragging){
+            const touch = e.touches[0];
+            key.style.left = (touch.clientX - ox) + "px";
+            key.style.top = (touch.clientY - oy) + "px";
+            e.preventDefault();
+        }
+    };
+
+    const touchEndHandler = e => {
+        if(!dragging) return;
+        dragging = false;
+
+        const touch = e.changedTouches[0];
+        let lockZone = document.getElementById("lockZone");
+        let lockRect = lockZone.getBoundingClientRect();
+        
+        if(touch.clientX > lockRect.left && touch.clientX < lockRect.right &&
+           touch.clientY > lockRect.top && touch.clientY < lockRect.bottom){
+            createSparkle(touch.clientX, touch.clientY);
+            key.remove();
+            document.removeEventListener("mousemove", moveHandler);
+            document.removeEventListener("mouseup", upHandler);
+            document.removeEventListener("touchmove", touchMoveHandler);
+            document.removeEventListener("touchend", touchEndHandler);
+            unlockFinal();
+        }
+    };
+
+    document.addEventListener("mousemove", moveHandler);
+    document.addEventListener("mouseup", upHandler);
+    document.addEventListener("touchmove", touchMoveHandler, {passive: false});
+    document.addEventListener("touchend", touchEndHandler);
+
+    document.body.appendChild(key);
+}
+
+/* ===== ENIGME 3 déverrouillage final ===== */
+function unlockFinal(){
+    const hint = document.getElementById("hint");
+    const result = document.getElementById("result");
+    const binaryCode = document.getElementById("binaryCode");
+    const slots = document.getElementById("slots");
+    const skipBtn = document.getElementById("skipBtn");
+    
+    // Faire disparaître tout avec animation
+    hint.classList.add("fade-out");
+    binaryCode.classList.add("fade-out");
+    slots.classList.add("fade-out");
+    skipBtn.style.display = "none";
+    
+    // Explosion de cœurs et sparkles au centre
+    for(let i = 0; i < 20; i++){
+        setTimeout(() => {
+            createSparkle(window.innerWidth/2, window.innerHeight/2);
+        }, i * 100);
+    }
+    
+    setTimeout(() => {
+        hint.style.display = "none";
+        binaryCode.style.display = "none";
+        slots.style.display = "none";
+        
+        // Afficher le message final avec animation
+        result.innerHTML = "💖 Veux-tu bien être ma Valentine ? 💖<br><br><span style='font-size:20px;font-style:italic;'>Signé Ewan</span>";
+        result.style.fontSize = "32px";
+        result.style.marginTop = "50px";
+        result.classList.add("fade-in");
+    }, 500);
+}
+
+/* ===== ANCIENNE fonction serrure (gardée pour compatibilité skip) ===== */
+function spawnLock(){
+    // Maintenant on appelle directement unlockFinal
+    unlockFinal();
+}
+
+</script>
+</body>
+</html>
